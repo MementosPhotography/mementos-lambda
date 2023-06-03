@@ -1,9 +1,7 @@
-const {
-  SecretsManagerClient,
-  CancelRotateSecretCommand,
-} = require("@aws-sdk/client-secrets-manager");
+const { SecretsManagerClient } = require("@aws-sdk/client-secrets-manager");
 const axios = require("axios");
 const secretsManager = new AWS.SecretsManager({ region: "us-east-1" });
+
 const rotateKey = async (event) => {
   const secretId = event.SecretId;
   const client = new SecretsManagerClient({ region: process.env.AWS_REGION });
@@ -18,7 +16,6 @@ const rotateKey = async (event) => {
 
   let newToken;
   if (tokenInfo.provider === "dropbox") {
-    // console.log(tokenInfo.refresh_token.replace('a', 'b'))
     const url = "https://api.dropbox.com/oauth2/token";
     const data = new URLSearchParams();
     data.append("grant_type", "refresh_token");
@@ -62,13 +59,5 @@ const rotateKey = async (event) => {
       2
     ),
   };
-
-  // Use this code if you don't use the http event with the LAMBDA-PROXY integration
-  // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
 };
 module.exports.rotateKey = rotateKey;
-
-// rotateKey({
-//   SecretId:
-//     "arn:aws:secretsmanager:us-east-1:344719897423:secret:Brand/5/DB-local-48sXrI",
-// });

@@ -1,6 +1,9 @@
-const { SecretsManagerClient } = require("@aws-sdk/client-secrets-manager");
+const {
+  SecretsManagerClient,
+  UpdateSecretCommand,
+  GetSecretValueCommand,
+} = require("@aws-sdk/client-secrets-manager");
 const axios = require("axios");
-const secretsManager = new AWS.SecretsManager({ region: "us-east-1" });
 
 const rotateKey = async (event) => {
   const secretId = event.SecretId;
@@ -15,10 +18,11 @@ const rotateKey = async (event) => {
   const tokenInfo = JSON.parse(currentSecretValue.SecretString);
 
   let newToken;
+  const data = new URLSearchParams();
+  data.append("grant_type", "refresh_token");
+
   if (tokenInfo.provider === "dropbox") {
     const url = "https://api.dropbox.com/oauth2/token";
-    const data = new URLSearchParams();
-    data.append("grant_type", "refresh_token");
     data.append("refresh_token", tokenInfo.refresh_token);
     data.append("client_id", "ybb500u8ux1i0in");
     data.append("client_secret", "8nfrmi6btkgcj43");
@@ -29,8 +33,6 @@ const rotateKey = async (event) => {
     }
   } else {
     const url = "https://auth.shootproof.com/oauth2/authorization/token";
-    const data = new URLSearchParams();
-    data.append("grant_type", "refresh_token");
     data.append("refresh_token", tokenInfo.refresh_token);
     data.append("scope", "studio");
     try {
@@ -40,20 +42,19 @@ const rotateKey = async (event) => {
     }
   }
 
-  await secretsManager
-    .updateSecret({
+  await secretsManager.send(
+    new UpdateSecretCommand({
       SecretId: secretId,
       SecretString: JSON.stringify({ ...tokenInfo, ...newToken.data }),
     })
-    .promise();
+  );
 
   return {
     statusCode: 200,
     body: JSON.stringify(
       {
-        message: "Token refreshed successfully",
+        message: `Update ${secretId} successfully`,
         input: event,
-        currentSecretValue,
       },
       null,
       2

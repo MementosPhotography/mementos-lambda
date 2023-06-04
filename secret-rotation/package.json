@@ -1,0 +1,21 @@
+{
+  "name": "sp-key-rotation",
+  "version": "1.0.0",
+  "description": "Rotates shootproof access keys",
+  "main": "handler.js",
+  "scripts": {
+    "start": "serverless offline -s dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.345.0",
+    "axios": "^1.4.0"
+  },
+  "devDependencies": {
+    "serverless": "^3.32.2",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^12.0.4"
+  }
+}
